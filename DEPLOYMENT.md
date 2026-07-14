@@ -48,6 +48,24 @@ This file explains how to obtain credentials for Neon (Postgres) and Upstash (Re
 - Never commit `.env` files with real secrets. Keep only `*.example` files in the repo.
 - Use Upstash REST tokens only on the server.
 
+8) Migrations (Prisma)
+- Keep `prisma/migrations` committed to the repo so production can apply the same migrations.
+- Locally create migrations after editing `prisma/schema.prisma`:
+  ```powershell
+  cd backend
+  copy .env.example .env
+  # set DATABASE_URL in backend/.env
+  npx prisma migrate dev --name describe_change
+  npx prisma generate
+  ```
+- In CI / production run:
+  ```bash
+  npx prisma migrate deploy
+  ```
+
+9) DB docs
+- See `backend/DB_SCHEMA.md` for the canonical table and column list created by Prisma.
+
 8) Quick test once deployed
 - From any machine, test the frontend reads the API and the backend can reach the DB/Redis:
   ```bash
