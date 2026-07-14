@@ -11,3 +11,52 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// Application models for RationalRage
+model User {
+  id        Int      @id @default(autoincrement())
+  nickname  String   @unique
+  createdAt DateTime @default(now())
+  // aggregate stats (can be updated after sessions)
+  sessions  Int      @default(0)
+  messages  Int      @default(0)
+  totalTime Int      @default(0) // seconds
+}
+
+model Room {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  isPrivate Boolean  @default(false)
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+  sessions  Session[]
+  messages  Message[]
+}
+
+model Session {
+  id         Int      @id @default(autoincrement())
+  roomId     Int
+  room       Room     @relation(fields: [roomId], references: [id])
+  nickname   String
+  startedAt  DateTime @default(now())
+  endedAt    DateTime?
+  duration   Int?     // seconds
+  messages   Int      @default(0)
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  roomId    Int
+  room      Room     @relation(fields: [roomId], references: [id])
+  sender    String
+  text      String
+  createdAt DateTime @default(now())
+}
+
+// Optional leaderboard / aggregate table if you want persistent scores
+model Leaderboard {
+  id        Int      @id @default(autoincrement())
+  nickname  String   @unique
+  rankScore Int      @default(0)
+  votes     Int      @default(0)
+}
