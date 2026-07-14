@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { pingRedis } from './redisClient.js';
 
 dotenv.config();
 
@@ -11,11 +12,15 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/api/health', (_req, res) => {
-  res.json({
-    ok: true,
-    message: 'RationalRage backend is online',
-    timestamp: new Date().toISOString(),
-  });
+  (async () => {
+    const redisOk = await pingRedis()
+    res.json({
+      ok: true,
+      message: 'RationalRage backend is online',
+      redis: redisOk ? 'ok' : 'unavailable',
+      timestamp: new Date().toISOString(),
+    })
+  })()
 });
 
 app.get('/api/rules', (_req, res) => {
