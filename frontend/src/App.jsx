@@ -25,7 +25,11 @@ function HomePage({ nickname, setNickname, onEnter }) {
   const [backendStatus, setBackendStatus] = useState('checking...');
 
   useEffect(() => {
-    fetch('/api/health')
+    const apiUrl = import.meta.env.VITE_API_URL 
+      ? `${import.meta.env.VITE_API_URL}/api/health`
+      : '/api/health';
+    
+    fetch(apiUrl)
       .then((response) => response.json())
       .then((data) => setBackendStatus(data.message))
       .catch(() => setBackendStatus('backend offline'));
