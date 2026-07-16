@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: frustratecurseop-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy
+    startCommand: node index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
