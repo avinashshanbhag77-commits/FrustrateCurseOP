@@ -3,5 +3,5 @@ services:
     name: frustratecurseop-backend
     runtime: node
     rootDir: backend
-    buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy
-    startCommand: node index.js
+    buildCommand: npm ci && npx prisma generate
+    startCommand: npx prisma migrate deploy && node index.js
