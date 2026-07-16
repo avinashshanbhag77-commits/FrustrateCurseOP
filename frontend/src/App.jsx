@@ -1,5 +1,7 @@
 import { Link, NavLink, Route, Routes, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { api } from './api';
+import ChatRoom from './ChatRoom';
 
 const nicknames = ['AngryWolf', 'SilentTiger', 'BrokenKing', 'MadPotato', 'DarkFox', 'LostSoul'];
 
@@ -142,6 +144,74 @@ function RulesPage() {
 
 function QueuePage({ nickname }) {
   const navigate = useNavigate();
+  const [roomCode, setRoomCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleJoinPublicQueue = async () => {
+    if (!nickname) {
+      alert('Please choose a nickname first');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const result = await api.joinQueue(nickname);
+      if (result.matched) {
+        localStorage.setItem('nickname', nickname);
+        navigate(`/chat/${result.roomCode}`);
+      } else {
+        alert('Added to queue! Waiting for a match...');
+      }
+    } catch (err) {
+      setError('Failed to join queue: ' + err.message);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreatePrivateRoom = async () => {
+    if (!nickname) {
+      alert('Please choose a nickname first');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const result = await api.createRoom(nickname);
+      localStorage.setItem('nickname', nickname);
+      navigate(`/chat/${result.roomCode}`);
+    } catch (err) {
+      setError('Failed to create room: ' + err.message);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoinPrivateRoom = async () => {
+    if (!nickname) {
+      alert('Please choose a nickname first');
+      return;
+    }
+    if (!roomCode) {
+      alert('Please enter a room code');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await api.joinRoom(roomCode, nickname);
+      localStorage.setItem('nickname', nickname);
+      navigate(`/chat/${roomCode}`);
+    } catch (err) {
+      setError('Failed to join room: ' + err.message);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-4 py-10 lg:px-8">
@@ -156,22 +226,45 @@ function QueuePage({ nickname }) {
           </div>
         </div>
 
+        {error && <div className="mt-4 p-3 bg-red-900/20 border border-red-500 rounded text-red-300">{error}</div>}
+
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div className="rounded-[24px] border border-white/10 bg-slate-950/60 p-6">
             <h3 className="text-xl font-semibold">Public Queue</h3>
             <p className="mt-2 text-sm text-slate-300">You will be paired with another anonymous user when someone is available.</p>
-            <button className="btn-primary mt-5" onClick={() => navigate('/chat')}>
-              Join Public Queue
+            <button 
+              className="btn-primary mt-5 disabled:opacity-50" 
+              onClick={handleJoinPublicQueue}
+              disabled={loading}
+            >
+              {loading ? 'Joining...' : 'Join Public Queue'}
             </button>
           </div>
           <div className="rounded-[24px] border border-white/10 bg-slate-950/60 p-6">
             <h3 className="text-xl font-semibold">Private Room</h3>
             <p className="mt-2 text-sm text-slate-300">Create or enter a room code for a more controlled match.</p>
             <div className="mt-4 flex gap-3">
-              <input className="w-full rounded-full border border-white/10 bg-white/10 px-4 py-3 text-sm" placeholder="Room code" />
-              <button className="btn-primary">Join</button>
+              <input 
+                className="w-full rounded-full border border-white/10 bg-white/10 px-4 py-3 text-sm text-white" 
+                placeholder="Room code" 
+                value={roomCode}
+                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+              />
+              <button 
+                className="btn-primary disabled:opacity-50" 
+                onClick={handleJoinPrivateRoom}
+                disabled={loading}
+              >
+                {loading ? '...' : 'Join'}
+              </button>
             </div>
-            <button className="btn-secondary mt-4">Create Private Room</button>
+            <button 
+              className="btn-secondary mt-4 disabled:opacity-50" 
+              onClick={handleCreatePrivateRoom}
+              disabled={loading}
+            >
+              {loading ? 'Creating...' : 'Create Private Room'}
+            </button>
           </div>
         </div>
       </div>
@@ -384,6 +477,7 @@ function App() {
         <Route path="/" element={<HomePage nickname={nickname} setNickname={setNickname} onEnter={() => navigate('/queue')} />} />
         <Route path="/rules" element={<RulesPage />} />
         <Route path="/queue" element={<QueuePage nickname={nickname} />} />
+        <Route path="/chat/:roomCode" element={<ChatRoom />} />
         <Route path="/chat" element={<ChatPage nickname={nickname} />} />
         <Route path="/leaderboards" element={<LeaderboardsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
