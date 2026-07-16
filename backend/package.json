@@ -7,12 +7,15 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "@prisma/client": "^7.8.0",
+    "@upstash/redis": "^1.38.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.3",
     "express": "^4.21.2",
     "frustratecurseop-monorepo": "file:.."
   },
   "devDependencies": {
-    "nodemon": "^3.1.1"
+    "nodemon": "^3.1.1",
+    "prisma": "^7.8.0"
   }
 }
