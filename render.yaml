@@ -4,4 +4,4 @@ services:
     runtime: node
     rootDir: backend
     buildCommand: npm ci && npx prisma generate
-    startCommand: npx prisma migrate deploy && node index.js
+    startCommand: node index.js
