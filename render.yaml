@@ -5,6 +5,3 @@ services:
     rootDir: backend
     buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy
     startCommand: node index.js
-    envVars:
-      - key: NODE_ENV
-        value: production
